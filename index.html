@@ -219,7 +219,7 @@
   if (!counter) return;
   const seen = Math.min(idxInOrder, LINKS.length);
   counter.hidden = false;
-  counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
+  counter.textContent = `Video ${seen}/${LINKS.length}`;
   const pf = typeof progressFill !== 'undefined' ? progressFill : document.getElementById('progressFill');
   if (pf) {
     const p = Math.round((seen / LINKS.length) * 100);
