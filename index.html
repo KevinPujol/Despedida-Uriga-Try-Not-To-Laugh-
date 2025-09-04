@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generador  de videos aleatorios</title>
+  <title>Generador de videos aleatorios</title>
   <meta name="description" content="Página simple que muestra un video aleatorio de una lista (YouTube y TikTok)." />
   <style>
     :root {
@@ -66,8 +66,8 @@
       font-weight: 600; letter-spacing: .2px; text-decoration: none; display: inline-flex; align-items: center; gap: .55rem;
     }
     .primary { background: var(--accent); color: #ffffff }
-    .secondary { background: transparent; color: var(--text); border: 1px solid var(--border) }
-    .secondary:hover { border-color: color-mix(in oklab, var(--border) 60%, var(--text) 40%) }
+    .secondary { background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,.06) }
+    .secondary:hover { border-color: color-mix(in oklab, var(--border) 40%, var(--text) 60%); box-shadow: 0 2px 6px rgba(0,0,0,.08); transform: translateY(-1px) }
     .primary:hover { filter: brightness(1.05) }
 
     .info { display: grid; gap: 4px; margin-top: 6px }
@@ -85,8 +85,15 @@
         <!-- Coloca el archivo del logo como 'logo.jpg' junto a este index.html -->
         <img src="logo.jpg" alt="Olga &amp; Oriol – 04.10.2025" onerror="this.style.display='none'"/>
         <div>
-          <h1>Generador  de videos aleatorios</h1>
+          <h1>Generador de videos aleatorios</h1>
           <div class="muted">Soporta Youtube (inc. Shorts).</div>
+        </div>
+      </div>
+      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
+    </div>
+        </div>
+      </div>
+    </div>
         </div>
       </div>
       <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
@@ -102,7 +109,7 @@
     </div>
 
     <div class="controls">
-      <a id="openOriginal" class="secondary button" href="#" target="_blank" rel="noopener" hidden>Abrir en su app</a>
+      <a id="openOriginal" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Abrir en su app</a>
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
     </div>
 
@@ -150,6 +157,7 @@
   const sourceHost = $("#sourceHost");
   const sourceUrl = $("#sourceUrl");
   let lastIndex = -1;
+  // Intentar cargar el logo desde varios nombres comunes
 
   function randIndex() {
     if (LINKS.length <= 1) return 0;
