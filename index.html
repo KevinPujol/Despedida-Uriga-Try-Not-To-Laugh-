@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Video aleatorio</title>
+  <meta name="description" content="Página simple que muestra un video aleatorio de una lista (YouTube y TikTok)." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --accent: #7dd3fc;
+      --text: #eef2ff;
+      --muted: #a5b4fc;
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 80% -20%, #1f2a66 0%, transparent 60%),
+                  radial-gradient(800px 600px at -10% 10%, #0d3b66 0%, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(960px, 100%);
+      background: color-mix(in oklab, var(--panel) 92%, white 8%);
+      backdrop-filter: blur(6px) saturate(120%);
+      border: 1px solid color-mix(in oklab, var(--panel) 85%, white 15%);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      padding: 18px;
+    }
+    .head {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      padding: 8px 6px 14px;
+    }
+    h1 { font-size: clamp(1.2rem, 2.2vw + .6rem, 1.8rem); margin: 0; letter-spacing: .2px }
+    .muted { color: var(--muted); font-size: .95rem }
+
+    .player-wrap { position: relative; width: 100%; }
+    .ratio {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #0b1020;
+      border-radius: 14px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    iframe, .tiktok-embed { width: 100%; height: 100% }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px }
+    button, a.button {
+      --pad: 12px 16px;
+      appearance: none; border: 0; padding: var(--pad); border-radius: 12px; cursor: pointer;
+      font-weight: 600; letter-spacing: .2px; text-decoration: none; display: inline-flex; align-items: center; gap: .55rem;
+    }
+    .primary { background: var(--accent); color: #0b1020 }
+    .secondary { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.18) }
+    .secondary:hover { border-color: rgba(255,255,255,.35) }
+    .primary:hover { filter: brightness(1.05) }
+
+    .info { display: grid; gap: 4px; margin-top: 6px }
+    .small { font-size: .9rem }
+    code.inline { background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 8px }
+
+    .footer { margin-top: 12px; color: #b6c2ff8c; font-size: .85rem }
+    .footer a { color: inherit }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="head">
+      <div>
+        <h1>Video aleatorio de tu lista</h1>
+        <div class="muted">Soporta YouTube (incl. Shorts) y TikTok</div>
+      </div>
+      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
+    </div>
+
+    <div class="player-wrap">
+      <div id="player" class="ratio" aria-live="polite" aria-busy="false">
+        <div class="muted small">Pulsa <strong>Otro video</strong> para empezar 🔀</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <a id="openOriginal" class="secondary button" href="#" target="_blank" rel="noopener" hidden>Abrir en su app</a>
+      <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
+    </div>
+
+    <div class="info small" id="meta" hidden>
+      <div>Fuente: <code id="sourceHost" class="inline"></code></div>
+      <div>URL: <code id="sourceUrl" class="inline" style="word-break: break-all"></code></div>
+    </div>
+
+    <div class="footer">Si algún video no permite <em>embed</em>, usa “Abrir en su app”.</div>
+  </main>
+
+  <script>
+  // === 1) Pega aquí tus enlaces (YouTube / TikTok) ===
+  const LINKS = [
+    "https://www.youtube.com/shorts/WJrTD-hvzqk",
+    "https://www.youtube.com/watch?v=cDvBwePeebA",
+    "https://www.youtube.com/watch?v=PPzIWFJU_3s&list=RDPPzIWFJU_3s&start_radio=1",
+    "https://www.youtube.com/watch?v=0NDy6Rlijzo&list=RD0NDy6Rlijzo&start_radio=1",
+    "https://www.youtube.com/shorts/BZcI5B5_YXE",
+    "https://www.tiktok.com/@fada20252/video/7516020328758381854?_r=1&_t=ZN-8zLTWsrPJV0",
+    "https://www.youtube.com/shorts/Nu2nIX-Rm4k",
+    "https://www.tiktok.com/@jabez.elim/video/7501004773706059014?lang=en&utm_source=chatgpt.com",
+    "https://www.tiktok.com/@_ki_be_/video/7417195969202097414",
+    "https://www.tiktok.com/@viralgreenscreenhub/video/7541201896577453334?lang=en&utm_source=chatgpt.com",
+    "https://www.tiktok.com/@realnatureplanet/video/7290261136283323690?lang=en&utm_source=chatgpt.com",
+    "https://www.youtube.com/watch?v=H8-uYAVhaCs&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=20",
+    "https://www.youtube.com/watch?v=BK7hGo_u70E&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=25",
+    "https://www.youtube.com/watch?v=uUxChessSEY&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=33",
+    "https://www.youtube.com/watch?v=U60oGYWZ92U&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=42",
+    "https://www.youtube.com/watch?v=ZBJqnZy4qks&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=43",
+    "https://www.youtube.com/watch?v=UbiShEn5_iA&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=47",
+    "https://www.youtube.com/watch?v=qdbjNJkqSxQ&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=59",
+    "https://www.youtube.com/watch?v=ADsSVaCG5C8&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=68",
+    "https://www.youtube.com/watch?v=l-RJap7NDVs&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=72",
+    "https://www.youtube.com/watch?v=Ltc-voYup4U&list=PLHxODKxNtwmGmX1OjiUKv6jxF0T8RT-o6&index=77"
+  ];
+
+  // === 2) Utilidades ===
+  const $ = sel => document.querySelector(sel);
+  const player = $("#player");
+  const btnShuffle = $("#shuffle");
+  const linkOpen = $("#openOriginal");
+  const btnCopy = $("#copyLink");
+  const meta = $("#meta");
+  const sourceHost = $("#sourceHost");
+  const sourceUrl = $("#sourceUrl");
+  let lastIndex = -1;
+
+  function randIndex() {
+    if (LINKS.length <= 1) return 0;
+    let i;
+    do { i = Math.floor(Math.random() * LINKS.length) } while (i === lastIndex);
+    lastIndex = i;
+    return i;
+  }
+
+  function parseProvider(raw) {
+    try {
+      const url = new URL(raw);
+      const host = url.hostname.replace(/^www\./, "");
+      if (host.includes("tiktok.com")) {
+        // Expect path like /@user/video/1234567890
+        const m = url.pathname.match(/\/video\/(\d+)/);
+        const id = m ? m[1] : null;
+        return { provider: "tiktok", id, url: raw, host };
+      }
+      if (host.includes("youtube.com") || host === "youtu.be") {
+        let id = null;
+        if (url.pathname.startsWith("/shorts/")) {
+          id = url.pathname.split("/")[2] || null;
+        } else if (host === "youtu.be") {
+          id = url.pathname.slice(1) || null;
+        } else {
+          id = url.searchParams.get("v");
+        }
+        return { provider: "youtube", id, url: raw, host };
+      }
+      return { provider: "link", id: null, url: raw, host };
+    } catch (e) {
+      return { provider: "link", id: null, url: raw, host: "url inválida" };
+    }
+  }
+
+  function clearPlayer() {
+    player.innerHTML = "";
+  }
+
+  function renderYouTube(id) {
+    const embed = document.createElement("iframe");
+    embed.setAttribute("allowfullscreen", "");
+    embed.setAttribute("loading", "lazy");
+    embed.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+    embed.width = "100%"; embed.height = "100%";
+    embed.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+    player.appendChild(embed);
+  }
+
+  function renderTikTok(id, originalUrl) {
+    // Método oficial de TikTok: blockquote + script embed
+    const container = document.createElement("div");
+    container.style.width = "100%";
+    container.style.height = "100%";
+    container.style.display = "grid";
+    container.style.placeItems = "center";
+
+    const bq = document.createElement("blockquote");
+    bq.className = "tiktok-embed";
+    bq.setAttribute("data-video-id", id);
+    bq.setAttribute("cite", originalUrl);
+    bq.style.margin = 0;
+    bq.style.width = "100%";
+    bq.style.height = "100%";
+
+    const s = document.createElement("script");
+    s.src = "https://www.tiktok.com/embed.js";
+    s.async = true;
+
+    container.appendChild(bq);
+    container.appendChild(s);
+    player.appendChild(container);
+  }
+
+  function showMeta(info) {
+    linkOpen.hidden = false;
+    linkOpen.href = info.url;
+    btnCopy.hidden = false;
+    meta.hidden = false;
+    sourceHost.textContent = info.host;
+    sourceUrl.textContent = info.url;
+  }
+
+  function pickRandom() {
+    player.setAttribute("aria-busy", "true");
+    clearPlayer();
+    const raw = LINKS[randIndex()];
+    const info = parseProvider(raw);
+
+    if (info.provider === "youtube" && info.id) {
+      renderYouTube(info.id);
+      showMeta(info);
+    } else if (info.provider === "tiktok" && info.id) {
+      renderTikTok(info.id, info.url);
+      showMeta(info);
+    } else {
+      // Fallback: no compatible embed
+      const msg = document.createElement("div");
+      msg.className = "muted";
+      msg.innerHTML = `No puedo embeber este enlace. <a href="${info.url}" target="_blank" rel="noopener">Ábrelo aquí</a>.`;
+      player.appendChild(msg);
+      showMeta(info);
+    }
+
+    player.removeAttribute("aria-busy");
+  }
+
+  btnShuffle.addEventListener("click", pickRandom);
+
+  btnCopy.addEventListener("click", async () => {
+    const url = linkOpen.href;
+    try {
+      await navigator.clipboard.writeText(url);
+      btnCopy.textContent = "¡Copiado!";
+      setTimeout(() => (btnCopy.textContent = "Copiar enlace"), 1200);
+    } catch {
+      // Fallback
+      alert("Copia manual: " + url);
+    }
+  });
+
+  // Auto-inicio: selecciona uno al cargar
+  // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente
+  </script>
+</body>
+</html>
