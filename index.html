@@ -86,7 +86,6 @@
   .controls .secondary { width: min(420px, 100%); }
 }
 
-/* Center title and primary button on mobile */
 @media (max-width: 640px) {
   .topbar { flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
   .topbar .left, .topbar .right { width: 100%; display: flex; justify-content: center; }
@@ -121,14 +120,9 @@
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
       <span id="counter" class="small muted counter"></span>
     </div>
-      <div></div>
-    </div>
 
-  
-
-<div class="footer"><div class="love">Hecho con ❤️ para Olga &amp; Oriol.</div></div>
-
-</main>
+  <div class="footer"><div class="love">Hecho con ❤️ para Olga &amp; Oriol.</div></div>
+  </main>
 
   <script>
   // === 1) Pega aquí tus enlaces (YouTube / TikTok) ===
@@ -314,7 +308,7 @@
   // Auto-inicio: selecciona uno al cargar
   // makeOrder(); // prepara la primera ronda
   // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente
-    <script>updateCounter && updateCounter();</script>
-<script>try{ updateCounter && updateCounter(); }catch(e){/*noop*/}</script>
-</script></body>
+  </script>
+<script>try{ updateCounter && updateCounter(); }catch(e){}</script>
+</body>
 </html>
