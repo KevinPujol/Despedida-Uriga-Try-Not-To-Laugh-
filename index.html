@@ -104,7 +104,7 @@
     </div>
 
     <div class="controls">
-      <a id="openOriginal" class="button secondary" href="#" target="_blank" rel="noopener" hidden>Abrir en su app</a>
+      <button id="openOriginal" class="secondary" type="button" hidden>Abrir en su app</button>
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
     </div>
 
@@ -152,6 +152,7 @@
   const sourceHost = $("#sourceHost");
   const sourceUrl = $("#sourceUrl");
   let lastIndex = -1;
+  let currentUrl = null;
   // Intentar cargar el logo desde varios nombres comunes
 
   function randIndex() {
@@ -215,7 +216,8 @@
 
   function showMeta(info) {
     linkOpen.hidden = false;
-    linkOpen.href = info.url;
+    linkOpen.disabled = false;
+    currentUrl = info.url;
     btnCopy.hidden = false;
     meta.hidden = false;
     sourceHost.textContent = info.host;
@@ -248,8 +250,13 @@
 
   btnShuffle.addEventListener("click", pickRandom);
 
+  // Abrir en su app (como botón, no enlace)
+  linkOpen.addEventListener("click", () => {
+    if (currentUrl) window.open(currentUrl, "_blank", "noopener");
+  });
+
   btnCopy.addEventListener("click", async () => {
-    const url = linkOpen.href;
+    const url = currentUrl;
     try {
       await navigator.clipboard.writeText(url);
       btnCopy.textContent = "¡Copiado!";
