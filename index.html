@@ -190,10 +190,8 @@
     const seen = Math.min(idxInOrder, LINKS.length);
     counter.hidden = false;
     counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
-  } while (i === lastIndex);
-    lastIndex = i;
-    return i;
-  }
+  
+
 
   function parseProvider(raw) {
     try {
@@ -302,7 +300,7 @@
 
   // Auto-inicio: selecciona uno al cargar
   // makeOrder(); // prepara la primera ronda
-  // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente // -> descomentarlo si quieres cargar uno automáticamente
+  // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente
   </script>
 </body>
 </html>
