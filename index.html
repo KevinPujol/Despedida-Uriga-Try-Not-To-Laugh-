@@ -81,8 +81,18 @@
     .topbar .left { display:grid; gap:4px; max-width: 75% }
     .topbar .right { display:flex; align-items:center }
     .brand { justify-self: center }
-    
-  </style>
+
+/* Ensure no divider under header */
+.topbar { border-bottom: none !important; box-shadow: none !important; }
+
+/* Mobile: center title, subtitle, and primary button */
+@media (max-width: 640px) {
+  .topbar { flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .topbar .left, .topbar .right { max-width: 100%; width: 100%; display: flex; justify-content: center; }
+  .topbar .left h1, .topbar .left .muted { text-align: center; }
+}
+
+</style>
 </head>
 <body>
   <main class="card">
@@ -96,7 +106,7 @@
           <div class="muted">Soporta Youtube (inc. Shorts).</div>
         </div>
         <div class="right">
-          <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
+          <button id="shuffle" class="primary" title="Otro video" type="button">🔀 Otro video</button>
         </div>
       </div>
     </div>
