@@ -57,6 +57,7 @@
     iframe, .tiktok-embed { width: 100%; height: 100% }
 
     .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px }
+    .controls .counter { margin-left: auto }
     button, a.button {
       --pad: 12px 16px;
       appearance: none; border: 0; padding: var(--pad); border-radius: 12px; cursor: pointer;
@@ -106,6 +107,7 @@
     <div class="controls">
       <button id="openOriginal" class="secondary" type="button" hidden>Abrir en su app</button>
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
+      <span id="counter" class="small muted counter" hidden></span>
     </div>
 
     <div class="info small" id="meta" hidden>
@@ -151,14 +153,44 @@
   const meta = $("#meta");
   const sourceHost = $("#sourceHost");
   const sourceUrl = $("#sourceUrl");
+  const counter = $("#counter");
   let lastIndex = -1;
   let currentUrl = null;
+  let order = [];
+  let idxInOrder = 0;
+  let round = 1;
   // Intentar cargar el logo desde varios nombres comunes
 
-  function randIndex() {
-    if (LINKS.length <= 1) return 0;
-    let i;
-    do { i = Math.floor(Math.random() * LINKS.length) } while (i === lastIndex);
+  function makeOrder(prev) {
+    order = Array.from({length: LINKS.length}, (_, i) => i);
+    // Fisher–Yates shuffle
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    // Evitar que la nueva ronda empiece con el mismo que terminó la anterior
+    if (typeof prev === 'number' && order.length > 1 && order[0] === prev) {
+      [order[0], order[1]] = [order[1], order[0]];
+    }
+    idxInOrder = 0;
+  }
+
+  function nextIndex() {
+    if (order.length === 0 || idxInOrder >= order.length) {
+      if (order.length > 0) round += 1; // sólo aumenta al completar una ronda
+      makeOrder(lastIndex);
+    }
+    const i = order[idxInOrder++];
+    lastIndex = i;
+    return i;
+  }
+
+  function updateCounter() {
+    if (!counter) return;
+    const seen = Math.min(idxInOrder, LINKS.length);
+    counter.hidden = false;
+    counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
+  } while (i === lastIndex);
     lastIndex = i;
     return i;
   }
@@ -227,7 +259,7 @@
   function pickRandom() {
     player.setAttribute("aria-busy", "true");
     clearPlayer();
-    const raw = LINKS[randIndex()];
+    const raw = LINKS[nextIndex()];
     const info = parseProvider(raw);
 
     if (info.provider === "youtube" && info.id) {
@@ -246,6 +278,7 @@
     }
 
     player.removeAttribute("aria-busy");
+    updateCounter();
   }
 
   btnShuffle.addEventListener("click", pickRandom);
@@ -268,7 +301,8 @@
   });
 
   // Auto-inicio: selecciona uno al cargar
-  // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente
+  // makeOrder(); // prepara la primera ronda
+  // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente // -> descomentarlo si quieres cargar uno automáticamente
   </script>
 </body>
 </html>
