@@ -73,8 +73,6 @@
     code.inline { background: #f0ecea; padding: 2px 6px; border-radius: 8px }
 
     .footer { margin-top: 12px; color: #8e837f; font-size: .85rem }
-.footer .love { text-align: center; }
-
     .footer a { color: inherit }
     /* layout for title left / button right */
     .topbar { display:flex; justify-content: space-between; align-items:center; width: 100%; gap: 12px; flex-wrap: wrap }
@@ -82,32 +80,19 @@
     .topbar .right { display:flex; align-items:center }
     .brand { justify-self: center }
 
-/* Ensure no divider under header */
-.topbar { border-bottom: none !important; box-shadow: none !important; }
-
-/* Mobile: center title, subtitle, and primary button */
+/* Center secondary buttons on mobile */
 @media (max-width: 640px) {
-  .topbar { flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-  .topbar .left, .topbar .right { max-width: 100%; width: 100%; display: flex; justify-content: center; }
-  .topbar .left h1, .topbar .left .muted { text-align: center; }
+  .controls { display: grid; grid-template-columns: 1fr; gap: 10px; justify-items: center; }
+  .controls .secondary { width: min(420px, 100%); }
 }
 
-/* === Minimal UX additions === */
-
-/* Progress bar */
-.controls .progress { display: inline-flex; align-items: center; gap: 10px; margin-left: auto; }
-.controls .progress .bar { width: 140px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
-.controls .progress .fill { display: block; height: 100%; width: var(--p,0%); background: var(--accent); transition: width .35s ease; }
-/* Ensure counter sits next to progress (not pushed alone to the right) */
-.controls .counter { margin-left: 0; }
-
-/* Mobile: center title, subtitle, and primary button */
+/* Center title and primary button on mobile */
 @media (max-width: 640px) {
   .topbar { flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-  .topbar .left, .topbar .right { max-width: 100%; width: 100%; display: flex; justify-content: center; }
-  .topbar .left h1, .topbar .left .muted { text-align: center; }
+  .topbar .left, .topbar .right { width: 100%; display: flex; justify-content: center; }
+  .topbar .left h1 { text-align: center; }
 }
-
+.footer .love { text-align: center; }
 </style>
 </head>
 <body>
@@ -119,10 +104,9 @@
       <div class="topbar">
         <div class="left">
           <h1>Generador de videos aleatorios</h1>
-          <div class="muted">Soporta Youtube (inc. Shorts).</div>
         </div>
         <div class="right">
-          <button id="shuffle" class="primary" title="Otro video" type="button">🔀 Otro video</button>
+          <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
         </div>
       </div>
     </div>
@@ -135,17 +119,16 @@
     <div class="controls">
       <button id="openOriginal" class="secondary" type="button" hidden>Abrir en su app</button>
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
-      <div class="progress"><div class="bar"><span id="progressFill" class="fill" style="--p:0%"></span></div></div>
-      <span id="counter" class="small muted counter" hidden></span>
+      <span id="counter" class="small muted counter"></span>
+    </div>
+      <div></div>
     </div>
 
-    <div class="info small" id="meta" hidden>
-      <div>Fuente: <code id="sourceHost" class="inline"></code></div>
-      <div>URL: <code id="sourceUrl" class="inline" style="word-break: break-all"></code></div>
-    </div>
+  
 
-    <div class="footer">Si algún video no permite <em>embed</em>, usa “Abrir en su app”.<br/><div class="love">Hecho con ❤️ para Olga &amp; Oriol.</div></div>
-  </main>
+<div class="footer"><div class="love">Hecho con ❤️ para Olga &amp; Oriol.</div></div>
+
+</main>
 
   <script>
   // === 1) Pega aquí tus enlaces (YouTube / TikTok) ===
@@ -179,11 +162,10 @@
   const btnShuffle = $("#shuffle");
   const linkOpen = $("#openOriginal");
   const btnCopy = $("#copyLink");
-  const meta = $("#meta");
+  const meta = $("#meta"); /* could be null (clean version) */
   const sourceHost = $("#sourceHost");
   const sourceUrl = $("#sourceUrl");
   const counter = $("#counter");
-  const progressFill = $("#progressFill");
   let lastIndex = -1;
   let currentUrl = null;
   let order = [];
@@ -216,17 +198,13 @@
   }
 
   function updateCounter() {
-  if (!counter) return;
-  const seen = Math.min(idxInOrder, LINKS.length);
-  counter.hidden = false;
-  counter.textContent = `Video ${seen}/${LINKS.length}`;
-  const pf = typeof progressFill !== 'undefined' ? progressFill : document.getElementById('progressFill');
-  if (pf) {
-    const p = Math.round((seen / LINKS.length) * 100);
-    pf.style.width = p + '%';
-    pf.style.setProperty('--p', p + '%');
+    if (!counter) return;
+    const seen = Math.min(idxInOrder, LINKS.length);
+    counter.hidden = false;
+    counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
   }
-}
+  
+
 
   function parseProvider(raw) {
     try {
@@ -280,14 +258,14 @@
   }
 
   function showMeta(info) {
-    linkOpen.hidden = false;
-    linkOpen.disabled = false;
-    currentUrl = info.url;
-    btnCopy.hidden = false;
-    meta.hidden = false;
-    sourceHost.textContent = info.host;
-    sourceUrl.textContent = info.url;
-  }
+  linkOpen.hidden = false; linkOpen.disabled = false;
+  currentUrl = info.url;
+  btnCopy.hidden = false;
+  if (meta) meta.hidden = true; // meta removed
+  if (sourceHost) sourceHost.textContent = info.host;
+  if (sourceUrl) sourceUrl.textContent = info.url;
+}
+
 
   function pickRandom() {
     player.setAttribute("aria-busy", "true");
@@ -336,6 +314,7 @@
   // Auto-inicio: selecciona uno al cargar
   // makeOrder(); // prepara la primera ronda
   // pickRandom(); // -> descomentarlo si quieres cargar uno automáticamente
-  </script>
-</body>
+    <script>updateCounter && updateCounter();</script>
+<script>try{ updateCounter && updateCounter(); }catch(e){/*noop*/}</script>
+</script></body>
 </html>
