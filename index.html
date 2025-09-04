@@ -7,19 +7,21 @@
   <meta name="description" content="Página simple que muestra un video aleatorio de una lista (YouTube y TikTok)." />
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: #121a33;
-      --accent: #7dd3fc;
-      --text: #eef2ff;
-      --muted: #a5b4fc;
+      /* Paleta inspirada en la segunda imagen (web): fondos cálidos, texto oscuro y acento verde salvia */
+      --bg: #f6f3f2;        /* fondo principal muy claro, cálido */
+      --panel: #ffffff;     /* tarjetas/blancos */
+      --accent: #6f836f;    /* verde salvia para acentos y botones */
+      --text: #43312c;      /* marrón oscuro/charcoal cálido para texto */
+      --muted: #b6a9a4;     /* gris tostado para textos secundarios */
+      --border: #e7e1df;    /* borde suave */
     }
     * { box-sizing: border-box }
     html, body { height: 100% }
     body {
       margin: 0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 80% -20%, #1f2a66 0%, transparent 60%),
-                  radial-gradient(800px 600px at -10% 10%, #0d3b66 0%, transparent 60%),
+      background: radial-gradient(1000px 700px at 80% -20%, #f0ebe9 0%, transparent 60%),
+                  radial-gradient(800px 600px at -10% 10%, #efe9e6 0%, transparent 60%),
                   var(--bg);
       color: var(--text);
       display: grid;
@@ -28,30 +30,32 @@
     }
     .card {
       width: min(960px, 100%);
-      background: color-mix(in oklab, var(--panel) 92%, white 8%);
+      background: color-mix(in oklab, var(--panel) 86%, #faf6f4 14%);
       backdrop-filter: blur(6px) saturate(120%);
-      border: 1px solid color-mix(in oklab, var(--panel) 85%, white 15%);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
       padding: 18px;
     }
     .head {
       display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
       padding: 8px 6px 14px;
     }
-    h1 { font-size: clamp(1.2rem, 2.2vw + .6rem, 1.8rem); margin: 0; letter-spacing: .2px }
+    .brand { display: flex; align-items: center; gap: 12px }
+    .brand img { height: 42px; width: auto; display: block; }
+    h1 { color: var(--accent); font-size: clamp(1.2rem, 2.2vw + .6rem, 1.8rem); margin: 0; letter-spacing: .2px }
     .muted { color: var(--muted); font-size: .95rem }
 
     .player-wrap { position: relative; width: 100%; }
     .ratio {
       width: 100%;
       aspect-ratio: 16 / 9;
-      background: #0b1020;
+      background: #f1ecea;
       border-radius: 14px;
       overflow: hidden;
       display: grid;
       place-items: center;
-      border: 1px solid rgba(255,255,255,.08);
+      border: 1px solid var(--border);
     }
     iframe, .tiktok-embed { width: 100%; height: 100% }
 
@@ -61,25 +65,32 @@
       appearance: none; border: 0; padding: var(--pad); border-radius: 12px; cursor: pointer;
       font-weight: 600; letter-spacing: .2px; text-decoration: none; display: inline-flex; align-items: center; gap: .55rem;
     }
-    .primary { background: var(--accent); color: #0b1020 }
-    .secondary { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.18) }
-    .secondary:hover { border-color: rgba(255,255,255,.35) }
+    .primary { background: var(--accent); color: #ffffff }
+    .secondary { background: transparent; color: var(--text); border: 1px solid var(--border) }
+    .secondary:hover { border-color: color-mix(in oklab, var(--border) 60%, var(--text) 40%) }
     .primary:hover { filter: brightness(1.05) }
 
     .info { display: grid; gap: 4px; margin-top: 6px }
     .small { font-size: .9rem }
-    code.inline { background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 8px }
+    code.inline { background: #f0ecea; padding: 2px 6px; border-radius: 8px }
 
-    .footer { margin-top: 12px; color: #b6c2ff8c; font-size: .85rem }
+    .footer { margin-top: 12px; color: #8e837f; font-size: .85rem }
     .footer a { color: inherit }
   </style>
 </head>
 <body>
   <main class="card">
     <div class="head">
-      <div>
-        <h1>Video aleatorio de tu lista</h1>
-        <div class="muted">Soporta YouTube (incl. Shorts) y TikTok</div>
+      <div class="brand">
+        <!-- Coloca el archivo del logo como 'logo.jpg' junto a este index.html -->
+        <img src="logo.jpg" alt="Olga &amp; Oriol – 04.10.2025" onerror="this.style.display='none'"/>
+        <div>
+          <h1>Seleccionado de videos aleatorios</h1>
+          <div class="muted">Soporta Youtube (inc. Shorts).</div>
+        </div>
+      </div>
+      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
+    </div>
       </div>
       <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
     </div>
@@ -190,28 +201,13 @@
   }
 
   function renderTikTok(id, originalUrl) {
-    // Método oficial de TikTok: blockquote + script embed
-    const container = document.createElement("div");
-    container.style.width = "100%";
-    container.style.height = "100%";
-    container.style.display = "grid";
-    container.style.placeItems = "center";
-
-    const bq = document.createElement("blockquote");
-    bq.className = "tiktok-embed";
-    bq.setAttribute("data-video-id", id);
-    bq.setAttribute("cite", originalUrl);
-    bq.style.margin = 0;
-    bq.style.width = "100%";
-    bq.style.height = "100%";
-
-    const s = document.createElement("script");
-    s.src = "https://www.tiktok.com/embed.js";
-    s.async = true;
-
-    container.appendChild(bq);
-    container.appendChild(s);
-    player.appendChild(container);
+    // En lugar de embeber, informamos que debe abrirse en su app
+    const msg = document.createElement("div");
+    msg.className = "muted small";
+    msg.style.textAlign = "center";
+    msg.style.padding = "12px";
+    msg.innerHTML = `Este video de TikTok no permite <em>embed</em>.<br/><a href="${originalUrl}" target="_blank" rel="noopener">Ábrelo en su app</a>.`;
+    player.appendChild(msg);
   }
 
   function showMeta(info) {
