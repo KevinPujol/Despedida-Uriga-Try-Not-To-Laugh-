@@ -37,12 +37,9 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.08);
       padding: 18px;
     }
-    .head {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-      padding: 8px 6px 14px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px }
-    .brand img { height: 42px; width: auto; display: block; }
+    .head { display: grid; justify-items: center; gap: 6px; padding: 12px 6px 16px }
+    .brand { display: grid; justify-items: center; gap: 8px }
+    .brand img { height: clamp(72px, 12vw, 160px); width: auto; display: block; object-fit: contain; }
     h1 { color: var(--accent); font-size: clamp(1.2rem, 2.2vw + .6rem, 1.8rem); margin: 0; letter-spacing: .2px }
     .muted { color: var(--muted); font-size: .95rem }
 
@@ -76,32 +73,30 @@
 
     .footer { margin-top: 12px; color: #8e837f; font-size: .85rem }
     .footer a { color: inherit }
+    /* layout for title left / button right */
+    .topbar { display:flex; justify-content: space-between; align-items:center; width: 100%; gap: 12px; flex-wrap: wrap }
+    .topbar .left { display:grid; gap:4px; max-width: 75% }
+    .topbar .right { display:flex; align-items:center }
+    .brand { justify-self: center }
+    
   </style>
 </head>
 <body>
   <main class="card">
     <div class="head">
       <div class="brand">
-        <!-- Coloca el archivo del logo como 'logo.jpg' junto a este index.html -->
-        <img src="logo.jpg" alt="Olga &amp; Oriol – 04.10.2025" onerror="this.style.display='none'"/>
-        <div>
+        <img src="logo.png" alt="Olga &amp; Oriol – 04.10.2025" />
+      </div>
+      <div class="topbar">
+        <div class="left">
           <h1>Generador de videos aleatorios</h1>
           <div class="muted">Soporta Youtube (inc. Shorts).</div>
         </div>
-      </div>
-      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
-    </div>
+        <div class="right">
+          <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
         </div>
       </div>
     </div>
-        </div>
-      </div>
-      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
-    </div>
-      </div>
-      <button id="shuffle" class="primary" title="Otro video">🔀 Otro video</button>
-    </div>
-
     <div class="player-wrap">
       <div id="player" class="ratio" aria-live="polite" aria-busy="false">
         <div class="muted small">Pulsa <strong>Otro video</strong> para empezar 🔀</div>
