@@ -92,6 +92,22 @@
   .topbar .left h1, .topbar .left .muted { text-align: center; }
 }
 
+/* === Minimal UX additions === */
+
+/* Progress bar */
+.controls .progress { display: inline-flex; align-items: center; gap: 10px; margin-left: auto; }
+.controls .progress .bar { width: 140px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; }
+.controls .progress .fill { display: block; height: 100%; width: var(--p,0%); background: var(--accent); transition: width .35s ease; }
+/* Ensure counter sits next to progress (not pushed alone to the right) */
+.controls .counter { margin-left: 0; }
+
+/* Mobile: center title, subtitle, and primary button */
+@media (max-width: 640px) {
+  .topbar { flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .topbar .left, .topbar .right { max-width: 100%; width: 100%; display: flex; justify-content: center; }
+  .topbar .left h1, .topbar .left .muted { text-align: center; }
+}
+
 </style>
 </head>
 <body>
@@ -119,6 +135,7 @@
     <div class="controls">
       <button id="openOriginal" class="secondary" type="button" hidden>Abrir en su app</button>
       <button id="copyLink" class="secondary" hidden>Copiar enlace</button>
+      <div class="progress"><div class="bar"><span id="progressFill" class="fill" style="--p:0%"></span></div></div>
       <span id="counter" class="small muted counter" hidden></span>
     </div>
 
@@ -166,6 +183,7 @@
   const sourceHost = $("#sourceHost");
   const sourceUrl = $("#sourceUrl");
   const counter = $("#counter");
+  const progressFill = $("#progressFill");
   let lastIndex = -1;
   let currentUrl = null;
   let order = [];
@@ -198,13 +216,17 @@
   }
 
   function updateCounter() {
-    if (!counter) return;
-    const seen = Math.min(idxInOrder, LINKS.length);
-    counter.hidden = false;
-    counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
+  if (!counter) return;
+  const seen = Math.min(idxInOrder, LINKS.length);
+  counter.hidden = false;
+  counter.textContent = `Video ${seen}/${LINKS.length} · ronda ${round}`;
+  const pf = typeof progressFill !== 'undefined' ? progressFill : document.getElementById('progressFill');
+  if (pf) {
+    const p = Math.round((seen / LINKS.length) * 100);
+    pf.style.width = p + '%';
+    pf.style.setProperty('--p', p + '%');
   }
-  
-
+}
 
   function parseProvider(raw) {
     try {
